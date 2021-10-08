@@ -11,7 +11,7 @@ model = load_model()
 
 def show_predict_page():
     st.title("Discomfort Index Prediction")
-    st.title("Using Aqara Temperature and Humidity Sensor")
+    st.title("Using Aqara THP Sensor Data")
     
     st.write("""### Trained From Aqara Temperature and Humidity Sensor""")
 
