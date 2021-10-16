@@ -3,17 +3,27 @@ import pickle
 import numpy as np
 
 def load_model():
-    with open('discomfort_index.sav','rb') as file:
+    with open('aqara.sav','rb') as file:
         data = pickle.load(file)
     return data
 
-model = load_model()
+def load_modelKMA():
+    with open('KMA.sav','rb') as file:
+        dataKMA = pickle.load(file)
+    return dataKMA
+
+
 
 def show_predict_page():
     st.title("Discomfort Index Prediction")
-    st.title("Using Aqara THP Sensor Data")
     
-    st.write("""### Trained From Aqara Temperature and Humidity Sensor""")
+    st.write("""### Trained From Aqara DB or KMA DB""")
+    chooseDB = st.selectbox("Aqara DB or KMA DB",("KMA DB","Aqara DB"))
+
+    if chooseDB == "KMA DB":
+            model = load_modelKMA()
+    elif chooseDB == "Aqara DB":
+            model = load_model()
 
     temperature = st.slider("Temperature", min_value=-20, max_value=50,value=10,step=1)
     humidity = st.slider("Humidity", min_value=1, max_value=99,value=30, step=1)
@@ -26,11 +36,11 @@ def show_predict_page():
         #X = np.arrary([[temperature,humidity,air_pressure]])
 
         prediction = model.predict([[temperature,humidity,air_pressure]])
-        if prediction == "HIGH":
+        if (prediction == "HIGH" or prediction=="high"):
             prediction = "Uncomfortable"
-        elif prediction == "MIDDLE":
+        elif (prediction == "MIDDLE" or prediction=="mid"):
             prediction = "So-So"
-        elif prediction == "LOW":
+        elif (prediction == "LOW" or prediction=="low"):
             prediction = "Comfortable"
         else:
             return "error"
