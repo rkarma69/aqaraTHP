@@ -1,16 +1,19 @@
 import streamlit as st
 from predict_page import show_predict_page
 from explore_page import show_explore_page
+from model_page import show_model_page
 from PIL import Image
 
 image = Image.open("aqara.png")
 st.sidebar.image(image,width = 200)
-page=st.sidebar.selectbox("Explore or Predict using Aqara THP",("Predict","Explore"))
+page=st.sidebar.selectbox("Explore or Predict using Aqara THP",("Predict","Explore","Model Evaluation"))
 
 if page == "Predict":
     show_predict_page()
-else:
+elif page == "Explore":
     show_explore_page()
+else:
+    show_model_page()
     
 
 
