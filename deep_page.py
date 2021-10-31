@@ -28,8 +28,8 @@ from sklearn.preprocessing import LabelEncoder
 @st.cache
 def load_data():
     names = ['Temperature', 'Humidity', 'AirPressure', 'Class']
-    connection = mysql.connector.connect(host='192.168.219.102',user='iotuser',password="iot12345", database='iot')
-    #connection = mysql.connector.connect(host='112.157.171.74',user='iotuser',password="iot12345", database='iot')
+    #connection = mysql.connector.connect(host='192.168.219.102',user='iotuser',password="iot12345", database='iot')
+    connection = mysql.connector.connect(host='112.157.171.74',user='iotuser',password="iot12345", database='iot')
 
     mycursor = connection.cursor()
     
