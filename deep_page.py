@@ -29,11 +29,11 @@ from sklearn.preprocessing import LabelEncoder
 def load_data():
     names = ['Temperature', 'Humidity', 'AirPressure', 'Class']
     #connection = mysql.connector.connect(host='192.168.219.102',user='iotuser',password="iot12345", database='iot')
-    connection = mysql.connector.connect(host='112.157.171.74',user='iotuser',password="iot12345", database='iot')
+    connection = mysql.connector.connect(host='112.157.171.74',port="23306",user='iotuser',password="iot12345", database='iot')
 
     mycursor = connection.cursor()
     
-    sample_size = 1000
+    sample_size = 120
     
     mycursor.execute("select temperature, humidity,pressure,discomfort from discomfortTable order by id desc limit {}".format(sample_size))
     datasetAqara=pd.DataFrame(list(mycursor))
@@ -49,6 +49,8 @@ def load_data():
 
 
 datasetAqara, datasetKMA = load_data()
+print (type(datasetAqara),type(datasetKMA))
+
 subdataAqara = datasetAqara[["temperature","humidity","airpressure"]]
 subdataKMA = datasetKMA[["temperature","humidity","airpressure"]]
 
@@ -61,12 +63,6 @@ def show_deep_page():
     
     chooseDB = st.selectbox("Aqara DB or KMA DB",("KMA DB","Aqara DB"))
     #choosePlot=st.selectbox("Correlation chart, bar chart or data frame",("Correlation","Bar Chart", "Data Frame"))
-    if chooseDB == "KMA DB":
-            dataset = datasetKMA
-            subdata = subdataKMA
-    elif chooseDB == "Aqara DB":
-            dataset = datasetAqara
-            subdata = subdataAqara
 
     
 
@@ -80,33 +76,35 @@ def show_deep_page():
             dataset = datasetAqara
             subdata = subdataAqara
     
-    
+    print("test1",datasetKMA)
+    print("test2",datasetAqara)
 
 
 
 # Seperation of Dataset
-    array = dataset.values
+    #array = dataset.values
     #X = array[:,0:3]
-    yy = array[:,3]
+    #yy = array[:,3]
+
     X = dataset.iloc[:,0:3]
     y = dataset.iloc[:,3]
-    validatio_size = 0.20
+    validation_size = 0.10
     seed = 7
-
+    print(y)
     encorder = LabelEncoder()
     y1 = encorder.fit_transform(y)
+    print(y1)
     Y= pd.get_dummies(y1).values
     X_train,X_validation,y_train,y_validation = model_selection.train_test_split(
-        X,Y,test_size= validatio_size,stratify=y,random_state = seed)
-    print(yy)
-    print(y1)
+        X,Y,test_size= validation_size,stratify=y,random_state = seed)
+    
 
     
     model = tf.keras.models.Sequential()
     no_of_layers = st.slider("No. of Layers", min_value=2, max_value=10,value=3,step=1)
-    no_of_nodes = st.slider("No. of Nodes from Each Layer",min_value=3, max_value=10,value=3,step=1 )
+    no_of_nodes = st.slider("No. of Nodes from Each Layer",min_value=2, max_value=10,value=3,step=1 )
     batch_size = st.slider("Batch Size", min_value=10, max_value=100,value=50,step=10)
-    epochs = st.slider("No. of Epochs", min_value=100, max_value=500,value=200,step=100)
+    epochs = st.slider("No. of Epochs", min_value=100, max_value=1000,value=200,step=100)
 
     for iteration in range(no_of_layers-1):
         model.add(
@@ -139,11 +137,6 @@ def show_deep_page():
     st.text_area("Accuracy",accuracy,height=100)
     y_pred = model.predict(X_validation)
 
-    #print(y_pred)
-    #prediction = model.predict([[0,90,1000]])
-    #print(prediction)
-    #print(type(prediction))    
-    
 
     temperature = st.slider("Temperature", min_value=-20, max_value=50,value=10,step=1)
     humidity = st.slider("Humidity", min_value=1, max_value=99,value=30, step=1)
@@ -158,14 +151,17 @@ def show_deep_page():
         feelgood = np.array([[0,1,0]])
         feelsoso = np.array([[0,1,0]])
         prediction = model.predict([[temperature,humidity,air_pressure]])
-        print("hhh:",prediction[0,0])
-        if (prediction[0,0] == 1):
+        print("first:",prediction[0,0])
+        print("second",prediction[0,1])
+        print("third",prediction[0,2])
+        if (prediction[0,0] > 0.4):
             decision = "Uncomfortable"
-        elif (prediction[0,1] == 1):
+        elif (prediction[0,1] > 0.4):
             decision = "Comfortable"
-        elif (prediction[0,2] == 1):
+        elif (prediction[0,2] > 0.4):
             decision = "So-So"
         else:
+            decision = "Unpredictable"
             return "error"
         #st.subheader("The estimated discomfort index is ${discomfort_index[0]}")
     
